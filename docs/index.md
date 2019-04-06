@@ -11,13 +11,13 @@ The core library should compile for any platform that has a compiler that implem
 * Lambda expressions are used throughout the implementation
 * Variadic templates are applied specifically to make parsing/formatting more expressive
 
-## Minimum Compiler Versions
+## Minimum compiler versions
 
 * Visual Studio 2017
 * GCC 4.9.x
 * Clang  3.4
 
-## Required Dependencies
+## Required dependencies
 
 The core library depends on the following header-only libraries (all BSDv3 licensed):
 
@@ -25,7 +25,7 @@ The core library depends on the following header-only libraries (all BSDv3 licen
 * [exe4cpp](https://github.com/automatak/exe4cpp) is an event-loop (executor) abstraction with implementations based on ASIO.
 * [log4cpp](https://github.com/automatak/log4cpp) is a logging library with extensible log levels using ser4cpp sequence types.
 
-## Optional Dependencies
+## Optional dependencies
 
-* [libsodium](https://download.libsodium.org/doc/) is the default cryptographic backend
+* [libsodium](https://download.libsodium.org/doc/) is used for the default cryptographic backend
 * 
