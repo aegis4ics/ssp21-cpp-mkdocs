@@ -1,0 +1,14 @@
+site_name: SSP21-CPP
+theme:
+  name: 'material'  
+  palette:
+    primary: 'Blue Grey'
+    accent: 'Green'
+  font:
+    text: 'Ubuntu'
+    code: 'Ubuntu Mono'
+  logo: 'images/ssp21.png'    
+markdown_extensions:
+  - admonition
+extra_css:
+- 'stylesheets/extra.css'
