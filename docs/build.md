@@ -35,5 +35,9 @@ and then invoke CMake telling it where to find the root CMakeLists.txt file.
 > cmake .. 
 ```
 
-This will create your Makefile, Visual Studio Solution, etc.
+This will create your Makefile, Visual Studio Solution, etc. You can then build and install the library, e.g. on Linux:
+
+```
+> sudo make install
+```
 
