@@ -6,7 +6,7 @@ Clone the repository **recursively** to checkout all dependencies except libsodi
     > git clone --recursive https://github.com/aegis4ics/ssp21-cpp.git
 
 
-## libsodium
+## Install libsodium
 
 You'll need to install [libsodium](https://download.libsodium.org/doc/) if you intend to build the proxy application
 or run the integration tests.
@@ -24,7 +24,7 @@ add the following flag so that libsodium can be located:
 
 	 (path will vary based on version)
 
-## CMake
+## Invoke CMake
 
 [CMake](https://cmake.org/) is used to generate a build system for your platform. Create a separate folder for your build artifacts,
 and then invoke CMake telling it where to find the root CMakeLists.txt file.
@@ -35,7 +35,11 @@ and then invoke CMake telling it where to find the root CMakeLists.txt file.
 > cmake .. 
 ```
 
-This will create your Makefile, Visual Studio Solution, etc. You can then build and install the library, e.g. on Linux:
+This will create your Makefile, Visual Studio Solution, etc. You can then build and install the library.
+
+## Build and install
+
+The actual build command / proceedure depends on your platform, e.g. on Linux:
 
 ```
 > sudo make install
