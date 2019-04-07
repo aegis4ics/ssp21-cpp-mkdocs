@@ -7,8 +7,13 @@ theme:
   font:
     text: 'Ubuntu'
     code: 'Ubuntu Mono'
-  logo: 'images/ssp21.png'    
+  logo: 'img/ssp21.png'    
 markdown_extensions:
   - admonition
 extra_css:
 - 'stylesheets/extra.css'
+nav:
+- Home: 'index.md'
+- Build: 'build.md'
+- API:
+  - 'Introduction' : 'introduction.md'
