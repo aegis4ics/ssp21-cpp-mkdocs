@@ -10,10 +10,15 @@ theme:
   logo: 'img/ssp21.png'    
 markdown_extensions:
   - admonition
+plugins:
+  - markdownextradata
 extra_css:
 - 'stylesheets/extra.css'
 nav:
 - Home: 'index.md'
 - Building: 'build.md'
 - API:
-  - 'Introduction' : 'introduction.md'
+  - 'Introduction' : 'api_intro.md'
+extra:
+  version: 'development'
+  base_doc_path: 'https://ssp21.github.com'
