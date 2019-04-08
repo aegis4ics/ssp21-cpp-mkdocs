@@ -2,6 +2,8 @@
 
 SSP21-CPP is a platform-neutral reference implementation of the [SSP21](TODO) protocol written in modern C++ provided under the [BSD-3 clause license](https://opensource.org/licenses/BSD-3-Clause).
 
+In addition to this user guide, there is also auto-generated [API documentation]({{base_doxygen_path}}/{{version}}).
+
 ## Features
 
 * Scalable asynchronous design backed by arbitrary event loop (examples based on ASIO)
@@ -18,8 +20,8 @@ SSP21-CPP is a platform-neutral reference implementation of the [SSP21](TODO) pr
 
 The core library should compile for any platform that has a compiler that implements C++11/14 features:
 
-* Ownership using `std::unique_ptr<T>` and `std::shared_ptr<T>` where appropriate
-* Time management using `std::chrono::steady_clock`
+* Ownership using [std::unique_ptr<T>](http://www.cplusplus.com/reference/memory/unique_ptr/) and [std::shared_ptr<T>](http://www.cplusplus.com/reference/memory/shared_ptr/)
+* Time management using [std::chrono::steady_clock](https://en.cppreference.com/w/cpp/chrono/steady_clock)
 * Lambda expressions are used throughout the implementation
 * Variadic templates are applied specifically to make parsing/formatting more expressive
 

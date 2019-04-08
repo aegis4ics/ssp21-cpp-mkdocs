@@ -21,4 +21,4 @@ nav:
   - 'Introduction' : 'api_intro.md'
 extra:
   version: 'development'
-  base_doc_path: 'https://ssp21.github.com'
+  base_doxygen_path: 'https://ssp21.github.io/ssp21-cpp/doxygen'
