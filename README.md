@@ -3,12 +3,11 @@ Documentation for SSP21-CPP library using [MkDocs](https://www.mkdocs.org/)
 
 # building the docs
 
-Install MkDocs using the instructions in the [website](https://www.mkdocs.org/).
-
-Install the markdown extra data plugin:
+After installing MkDocs, install the [mkdocs-markdownextradata-plugin](https://github.com/rosscdh/mkdocs-markdownextradata-plugin) and the [Material](https://squidfunk.github.io/mkdocs-material/) theme:
 
 ```
-pip install mkdocs-markdownextradata-plugin
+> pip install mkdocs-markdownextradata-plugin
+> pip install mkdocs-material
 ```
 
 You can then build a static version of the docs using:
