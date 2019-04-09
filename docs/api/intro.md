@@ -26,14 +26,15 @@ The factory methods take a number of arguments that will be described in the fol
 User applications must provide their own implementations of both [IUpperLayer]({{base_doxygen_path}}/classssp21_1_1IUpperLayer.html) and
 [ILowerLayer]({{base_doxygen_path}}/classssp21_1_1ILowerLayer.html) to integrate with `IStack`.
 
+!!! tip
+    The [integration test suite](https://github.com/ssp21/ssp21-cpp/blob/master/cpp/tests/integration/IntegrationTestSuite.cpp) provides the
+	simplest example of implementing these interfaces and integrating with the library's API. Alternatively, the 
+	[proxy application](https://github.com/ssp21/ssp21-cpp/tree/master/cpp/exe/proxy) is a real world integration with TCP/IP as the transport
+	layer, but is more complex.
+
 The user provided `ILowerLayer` transmits fully formatted SSP21 messages on behalf of the stack, and notifies the stack's `IUpperLayer` when raw
 data is available for reading.
 
 The user provided `IUpperLayer` receives authenticated (and possibly decrypted) payload data from the stack. It uses the `ILowerLayer` provided by the
 stack to transmit user data.
 
-!!! info
-    The [integration test suite](https://github.com/ssp21/ssp21-cpp/blob/master/cpp/tests/integration/IntegrationTestSuite.cpp) provides the
-	simplest example of implementing these interfaces and integrating with the library's API. Alternatively, the 
-	[proxy application](https://github.com/ssp21/ssp21-cpp/tree/master/cpp/exe/proxy) is a real world integration with TCP/IP as the transport
-	layer, but is more complex.

@@ -39,7 +39,8 @@ When writing a program with multiple concurrent `IStack` instances, you should u
 one of the `detach(..)` methods provided on the `Logger` class which will create a new logger pointing to the same handler, but with a possibly distinct
 name and log levels.
 
-It is also possible to adjust the log level at runtime for a particular logger using the `set_levels` method. You can see all of the log levels defined
-in the SSP21 library [here]({{base_doxygen_path}}/namespacessp21_1_1levels.html).
+!!! tip
+    All of the log levels used by the library are defined [here]({{base_doxygen_path}}/namespacessp21_1_1levels.html).
 
-In addition to the standard log levels, the library provides four special levels for logging raw and decoded protocol messages for diagnostic purposes.
+It is also possible to adjust the log level at runtime for a particular logger using the `set_levels` method. In addition to the standard log levels, the
+library provides four special levels for logging raw and decoded protocol messages for diagnostic purposes.
