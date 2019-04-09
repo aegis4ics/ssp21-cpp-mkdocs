@@ -19,6 +19,8 @@ and the [responder]({{base_doxygen_path}}/namespacessp21_1_1responder_1_1factory
 
 ![IStack](../img/stack.svg)
 
+The factory methods take a number of arguments that will be described in the following sections.
+
 ## Integration
 
 User applications must provide their own implementations of both [IUpperLayer]({{base_doxygen_path}}/classssp21_1_1IUpperLayer.html) and
