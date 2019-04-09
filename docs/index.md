@@ -2,7 +2,7 @@
 
 SSP21-CPP is a platform-neutral reference implementation of the [SSP21](TODO) protocol written in modern C++ provided under the [BSD-3 clause license](https://opensource.org/licenses/BSD-3-Clause).
 
-In addition to this user guide, there is also auto-generated [API documentation]({{base_doxygen_path}}/{{version}}).
+In addition to this user guide, there is also an auto-generated [API reference]({{base_doxygen_path}}/{{version}}) with details on all the public classes and functions.
 
 ## Features
 
