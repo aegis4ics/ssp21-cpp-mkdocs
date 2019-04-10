@@ -34,7 +34,7 @@ To implement your own backend based on another library (e.g. openssl):
 
 1. Implement the `ICryptoBackend` interface using the alternate library, either in a standalone library or in your application.
 
-2. Initialize the backend before calling any of the `IStack` factory methods.
+2. Call [Crypto::initialize(..)]({{base_doxygen_path}}/classssp21_1_1Crypto.html) to inject the backend before calling any of the `IStack` factory methods.
 
 The libsodium initialize routine is simple:
 
