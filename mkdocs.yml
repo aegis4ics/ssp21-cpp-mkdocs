@@ -22,5 +22,6 @@ nav:
   - 'Introduction' : 'api/intro.md'
   - 'IExecutor' : 'api/executor.md'
   - 'Logging' : 'api/logging.md'
+  - 'Crypto' : 'api/crypto.md'
 extra:  
   base_doxygen_path: 'https://ssp21.github.io/ssp21-cpp/doxygen/development'
