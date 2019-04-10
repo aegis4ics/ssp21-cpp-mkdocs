@@ -1,4 +1,4 @@
-# Crypto
+# ICryptoBackend
 
 You'll notice that the factory methods to create an `IStack` instance, don't accept any arguments that specify the cryptographic backend. The cryptographic library
 is specified globally, usually as the first thing the application does during initialization. This makes it possible to call the cryptographic functions statelessly
