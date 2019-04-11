@@ -24,6 +24,8 @@ nav:
   - 'Logging' : 'api/logging.md'
   - 'ICryptoBackend' : 'api/crypto.md'
   - 'Error Handling' : 'api/error_handling.md'
+- ICFTool:
+  - 'Usage' : 'icftool/intro.md'
 - Proxy:
   - 'Introduction' : 'proxy/intro.md'
   - 'Configuration' : 'proxy/configuration.md'  
