@@ -24,5 +24,7 @@ nav:
   - 'Logging' : 'api/logging.md'
   - 'ICryptoBackend' : 'api/crypto.md'
   - 'Error Handling' : 'api/error_handling.md'
+- Proxy:
+  - 'Introduction' : 'proxy/intro.md'
 extra:  
   base_doxygen_path: 'https://ssp21.github.io/ssp21-cpp/doxygen/development'
