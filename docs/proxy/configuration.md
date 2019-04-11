@@ -52,7 +52,7 @@ The name of section (i-proxy above) is used for logging purposes to uniquely ide
 | crypto message  | m         | Log the type of SSP21 message received and its length                                        |
 | crypto fields   | f         | Log the individual fields in SSP21 messages                                                  |
 
-## Mode-specfic parameters
+## Mode-specific parameters
 
 Different handshake modes require different paramters described in the following sub-sections.
 
