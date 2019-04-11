@@ -4,9 +4,9 @@ SSP21-CPP provides and executable that can generate keys and certificates in the
 "Industrial Container Format" and is an unstandardized binary file format. 
 
 !!! warning 
-    The ICF file format was used for expediancy in the first release because it uses the SSP21 serialization format and rules, 
-	thus it didn't require manually writing and (un)parsers. The format for the container files might be changed to something more
-	conventional like the PEM format frequently used to encode X.509 and keys.
+    The ICF file format was used for expediancy in the first release because it uses the SSP21 serialization format and rules.
+	Therefore, it didn't require manually writing any (un)parsers. The format for the container files might be changed to something more
+	conventional like the PEM format frequently used to encode X.509 and keys in the future since only the proxy relies on them.
 
 The options presented with the `-h` (or ---help) argument are fairly self-explanatory.
 
