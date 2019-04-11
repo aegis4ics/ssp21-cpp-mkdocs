@@ -26,5 +26,6 @@ nav:
   - 'Error Handling' : 'api/error_handling.md'
 - Proxy:
   - 'Introduction' : 'proxy/intro.md'
+  - 'Configuration' : 'proxy/configuration.md'  
 extra:  
   base_doxygen_path: 'https://ssp21.github.io/ssp21-cpp/doxygen/development'
