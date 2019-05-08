@@ -28,6 +28,7 @@ nav:
   - 'Usage' : 'icftool/intro.md'
 - Proxy:
   - 'Introduction' : 'proxy/intro.md'
-  - 'Configuration' : 'proxy/configuration.md'  
+  - 'Configuration' : 'proxy/configuration.md'
+  - 'QIX' : 'proxy/qix.md'
 extra:  
   base_doxygen_path: 'https://ssp21.github.io/ssp21-cpp/doxygen/development'
