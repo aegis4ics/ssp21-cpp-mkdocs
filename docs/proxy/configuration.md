@@ -11,13 +11,8 @@ mode=<initiator|responder>
 log_levels=iwemf
 remote_address=1
 local_address=10
-max_sessions=1
-listen_port=20000
-listen_endpoint=127.0.0.1
-connect_port=20001
-connect_endpoint=127.0.0.1
 handshake_mode=<shared_secret|qkd|preshared|certificate>
-; additional parameters depend on the handshake mode 
+; additional parameters depend on the handshake mode or protocol type
 ```
 
 The name of section (i-proxy above) is used for logging purposes to uniquely identify log messages for a particular session.
@@ -81,22 +76,15 @@ illustrates the different settings:
 | key                          | description                                                                                                                  | 
 |------------------------------|------------------------------------------------------------------------------------------------------------------------------|
 | crypto_only                  | Specify if the SSP21 stack should include the optional link-layer.                                                           |
-| source_receive_endpoint      | For `initiator` mode, IP address where the proxy will listen for the insecure protocol traffic.                              |
-|                              | For `responder` mode, IP address where the proxy will listen for SSP21 traffic from an `initiator`.                          |
-| source_receive_port          | For `initiator` mode, port where the proxy will listen for the insecure protocol connection.                                 |
-|                              | For `responder` mode, port where the proxy will listen for the SSP21 connection from an `initiator`.                         |
-| source_send_endpoint         | For `initiator` mode, IP address where the proxy will send insecure protocol traffic.                                        |
-|                              | For `responder` mode, IP address where the proxy will send SSP21 traffic.                                                    |
-| source_send_port             | For `initiator` mode, port where the proxy will send insecure protocol traffic.                                              |
-|                              | For `responder` mode, port where the proxy will send SSP21 traffic.                                                          |
-| destination_receive_endpoint | For `initiator` mode, IP address where the proxy will listen for SSP21 traffic from a `responder`.                           |
-|                              | For `responder` mode, IP address where the proxy will listen for insecure protocol traffic.                                  |
-| destination_receive_port     | For `initiator` mode, port where the proxy will listen for SSP21 traffic from a `responder`.                                 |
-|                              | For `responder` mode, port where the proxy will listen for insecure protocol traffic.                                        |
-| destination_send_endpoint    | For `initiator` mode, IP address where the proxy will send SSP21 protocol traffic.                                           |
-|                              | For `responder` mode, IP address where the proxy will send insecure protocol traffic.                                        |
-| destination_send_port        | For `initiator` mode, port where the proxy will send SSP21 protocol traffic.                                                 |
-|                              | For `responder` mode, port where the proxy will send insecure protocol traffic.                                              |
+| raw.rx.ip                    | The IP address where the proxy listens for insecure traffic                                                                  |      
+| raw.rx.port                  | The port where the proxy listens for insecure traffic                                                                        |
+| raw.tx.ip                    | The IP address to which the proxy writes insecure traffic                                                                    |      
+| raw.tx.port                  | The port to which the proxy writes insecure traffic                                                                          |      
+| secure.rx.ip                 | The IP address where the proxy listens for SSP21 traffic                                                                     |      
+| secure.rx.port               | The port where the proxy listens for SSP21 traffic                                                                           |
+| secure.tx.ip                 | The IP address to which the proxy writes SSP21 traffic                                                                       |      
+| secure.tx.port               | The port to which the proxy writes SSP21 traffic                                                                             |      
+
 
 
 ## Mode-specific parameters
