@@ -1,44 +1,52 @@
 # Configuration
 
-The proxy accepts a single argument: the path to an [INI-style](https://en.wikipedia.org/wiki/INI_file) configuration file. 
-This file may contain an arbitrary number of configuration sections. Each section represents a single SSP21 `initiator` or `responder`
-configuration, e.g.:
+The proxy accepts a single argument: the path to a [YAML](https://yaml.org/) configuration file. This file contains a hierarchical
+configuration model that specifies the configuration for an arbitrary number of SSP21 `initiator` or `responder` sessions.
 
+``` yaml
+
+qkd_sources: []                  # sequence of QKD sources (e.g. QIX)
+sessions:                        # sequence of SSP21 proxy sessions
+  - id: "session1"               # an identifer for the session for logging purposes
+    levels: "iwemf"              # enabled log levels for this session
+    link_layer:                  # configuration of the link layer
+      enabled: true              # if enabled, wrap SSP21 with the link-layer
+      address:                   # addressing configuration required if 'enabled' == true
+        local: 10                # the address of the local node
+        remote: 1                # the address of the local node
+    security:                    # configuration of the SSP21 crypto layer
+      mode: "initiator"	         # SSP21 mode: { initiator, responder }
+      session:                   # configuration of the cryptographic session
+        max_payload_size: 4096   # maximum number of payload bytes that can be sent or received
+        ttl_pad:                 # how much of a time pad to apply to session messages
+          value: 10              # the value associated with the 'unit'
+          unit: seconds          # unit of the time {milliseconds, seconds, minutes, hours}
+#         ...                      omitted: initiator or responder specific session parameters
+      handshake:                 # configuration of the handshake
+#       ...                        omitted: initiator or responder specific handshake parameters
+        type: "shared_secret"    # type of handshake { shared_secret, preshared_public_key, qkd }
+#       ...                        omitted: handshake type specific parameters
+    transport:                   # configuration of the transport for 
+      type: "tcp"                # type of transport { tcp, udp }
+#     ...                          omitted: transport type specific parameters omitted
 ```
-[i-proxy]
-proto_type=tcp
-mode=<initiator|responder>
-log_levels=iwemf
-remote_address=1
-local_address=10
-handshake_mode=<shared_secret|qkd|preshared|certificate>
-; additional parameters depend on the handshake mode or protocol type
-```
 
-The name of section (i-proxy above) is used for logging purposes to uniquely identify log messages for a particular session.
-
-## Standard options
-
-| key              | description                                                                                                                  | 
-|------------------|------------------------------------------------------------------------------------------------------------------------------|
-| proto_type       | Defines the proxy uses `tcp` or `udp` as its transport protocol.                                                             |
-| mode             | Defines whether the session is an SSP21 `initiator` or a `responder`.                                                        |
-| log_levels       | string of enabled log levels (see [table](#log-levels)).                                                                     |
-| remote_address   | 16-bit remote address field to place in SSP21 link frames (only if a link-layer is used).                                    |
-| local_address    | 16-bit local address field to place in SSP21 link frames and expect from remote SSP21 peer (only is a link-layer is used).   |
-| handshake_mode   | Defines which of the four handshake modes to use. Additional parameters depend on this mode                                  |
+The YAML skeleton above describes all of the configuration values that must be present irrespective of the various modes that can be configured.
+The sections where configuration information have been omitted are dependent on the values of other parameters.
 
 ### Log levels
 
+The `levels` parameter in a session configuration contains a string of characters that specify which logs messages to enable.
+
 | level           | character | description                                                                                  |
 |-----------------|-----------|----------------------------------------------------------------------------------------------|
-| event           | v         |                                                                                              |
-| error           | e         |                                                                                              |
-| warning         | w         |                                                                                              |
-| info            | i         |                                                                                              |
-| debug           | d         |                                                                                              |
-| crypto message  | m         | Log the type of SSP21 message received and its length                                        |
-| crypto fields   | f         | Log the individual fields in SSP21 messages                                                  |
+| event           | v         | High priority messages such as startup and shutdown                                          |
+| error           | e         | Errors that don't occur during normal operation                                              |
+| warning         | w         | Less severe than error, events like discconects                                              |
+| info            | i         | Informational (non-error or warning) messages                                                |
+| debug           | d         | Detailed, but normally overhelming messages                                                  |
+| crypto message  | m         | High level decoding of SSP21 messages (type) and length                                      |
+| crypto fields   | f         | Detailed decoding of the individual fields in SSP21 messages                                 |
 
 ## Transport-specific parameters
 

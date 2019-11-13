@@ -1,2 +1,4 @@
 # generated site content
 site/
+# when you open folder in visual studio
+**/.vs
