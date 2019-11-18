@@ -9,6 +9,9 @@ qkd_sources: []                  # sequence of QKD sources (e.g. QIX)
 sessions:                        # sequence of SSP21 proxy sessions
   - id: "session1"               # an identifer for the session for logging purposes
     levels: "iwemf"              # enabled log levels for this session
+    transport:                   # configuration of the transport
+      type: "tcp"                # type of transport { tcp, udp }
+#     ...                          OMITTED: transport type specific parameters omitted
     link_layer:                  # configuration of the link layer
       enabled: true              # if enabled, wrap SSP21 with the link-layer
       address:                   # addressing configuration required if 'enabled' == true
@@ -21,14 +24,11 @@ sessions:                        # sequence of SSP21 proxy sessions
         ttl_pad:                 # how much of a time pad to apply to session messages
           value: 10              # the value associated with the 'unit'
           unit: seconds          # unit of the time {milliseconds, seconds, minutes, hours}
-#         ...                      omitted: initiator or responder specific session parameters
+#         ...                      OMITTED: initiator or responder specific session parameters
       handshake:                 # configuration of the handshake
-#       ...                        omitted: initiator or responder specific handshake parameters
+#       ...                        OMITTED: initiator or responder specific handshake parameters
         type: "shared_secret"    # type of handshake { shared_secret, preshared_public_key, qkd }
-#       ...                        omitted: handshake type specific parameters
-    transport:                   # configuration of the transport for 
-      type: "tcp"                # type of transport { tcp, udp }
-#     ...                          omitted: transport type specific parameters omitted
+#       ...                        OMITTED: handshake type specific parameters
 ```
 
 The YAML skeleton above describes all of the configuration values that must be present irrespective of the various modes that can be configured.
@@ -48,54 +48,89 @@ The `levels` parameter in a session configuration contains a string of character
 | crypto message  | m         | High level decoding of SSP21 messages (type) and length                                      |
 | crypto fields   | f         | Detailed decoding of the individual fields in SSP21 messages                                 |
 
-## Transport-specific parameters
+## Link-layer
 
-### TCP mode
+The SSP21 link-layer provides framing for stream oriented transports like TCP. Additionally, it provides 16-bit source and destination
+addresses which can be used for multiplexing multiple sessions on a single transport.
 
-In TCP, the link-layer is always used because the transport layer is stream based. Therefore, SSP21 link-layer acts
-as a framing protocol.
+TCP must always enable the link-layer, or an exception is thrown during startup.
 
-| key              | description                                                                                                                  | 
-|------------------|------------------------------------------------------------------------------------------------------------------------------|
-| max_sessions     | Number of allowed concurrent connections. When a new connection is received, the oldest is closed.                           |
-| listen_port      | For `initiator` mode, port where proxy will listen for the insecure protocol connection.                                     |
-|                  | For `responder` mode, port where proxy will listen for SSP21 connection from an `initiator`                                  |
-| listen_endpoint  | For `initiator` mode, the IP address of the adapter on which the proxy will listen for the insecure protocol connection.     |
-|                  | For `responder` mode, the IP address of the adapter on which the proxy will listen for SSP21 connection from an `initiator`  |
-| connect_port     | For `initiator` mode, port where proxy will attempt to connect and send SSP21 traffic.                                       |
-|                  | For `responder` mode, port where proxy will attempt to connect and send insecure protcol traffic.                            |
-| connect_endpoint | For `initiator` mode, the IP address to connect to and send SSP21 traffic                                                    |
-|                  | For `responder` mode, the IP address to connect to and send insecure protcol traffic                                         |
+```
+link_layer:
+  enabled: true
+  address:
+    local: 10
+    remote: 1
+```
 
-### UDP mode
+UDP may be used with or without the link-layer. If the link-layer is not used, the address information may be omitted:
 
-In UDP, the link-layer is not mandatory, since the transport protocol is datagram based. Therefore, it is possible
-to configure the proxy to include or not the link-layer with the `crypto_only` setting. Adding the link-layer permits
-to do data integrity if the operating system is not doing it on UDP in IPv4 (the UDP checksum is mandatory in IPv6).
+```
+link_layer:
+    enabled: false
+```
 
-Since UDP is a connectionless transport protocol, it is mandatory to specify all the addresses and ports. The following schema
-illustrates the different settings:
+## Transport modes
+
+The proxy supports TCP and UDP transport. Both modes take specific parameters. The following subsections provide configuration
+snippets for each mode.
+
+### TCP
+
+TCP transport requires the following parameters.
+
+```
+transport:
+  type: "tcp"
+  max_sessions: 1                # The maximum number of concurrent sessions on the listening side
+    listen:           
+      address: "127.0.0.1"       # IP address of adapter on which to listen
+      port: 20000                # Port on which to listen
+    connect:
+      address: "127.0.0.1"       # IP to connect
+      port: 20001                # Port to connect
+```
+
+When using TCP as an initiator, the proxy will not attempt a SSP21/TCP connection until the application (raw) side
+of the connection occurs.
+
+!!! note
+    With regard to listening, certain special addresses have the typical meanings:
+
+	* *"0.0.0.0"* - listen on all adapters
+
+	* *"127.0.0.1"* - only accept connections from the loopback adapter
+
+### UDP
+
+UDP is a connectionless transport protocol, so you must specify addresses and ports
+for both receiving and transmitting separately.
+
+```
+transport:
+  type: "udp"      
+  raw_rx:
+    address: "127.0.0.1"
+    port: 20000
+  raw_tx:
+    address: "127.0.0.1"
+    port: 20001
+  secure_rx:
+    address: "127.0.0.1"
+    port: 20002
+  secure_tx:
+    address: "127.0.0.1"
+    port: 20003
+```
+
+The following diagram illustrates how the parameters above are applied:
 
 ![UDP proxy](../img/udp.svg)
 
 !!! warning
-    Be careful when setting the ports so that no communication loops back.
+    Be careful when setting the ports so that no communication loops back creating a cycle.
 
-| key                          | description                                                                                                                  | 
-|------------------------------|------------------------------------------------------------------------------------------------------------------------------|
-| crypto_only                  | Specify if the SSP21 stack should include the optional link-layer.                                                           |
-| raw.rx.ip                    | The IP address where the proxy listens for insecure traffic                                                                  |      
-| raw.rx.port                  | The port where the proxy listens for insecure traffic                                                                        |
-| raw.tx.ip                    | The IP address to which the proxy writes insecure traffic                                                                    |      
-| raw.tx.port                  | The port to which the proxy writes insecure traffic                                                                          |      
-| secure.rx.ip                 | The IP address where the proxy listens for SSP21 traffic                                                                     |      
-| secure.rx.port               | The port where the proxy listens for SSP21 traffic                                                                           |
-| secure.tx.ip                 | The IP address to which the proxy writes SSP21 traffic                                                                       |      
-| secure.tx.port               | The port to which the proxy writes SSP21 traffic                                                                             |      
-
-
-
-## Mode-specific parameters
+## Handshake types
 
 Different handshake modes require different paramters described in the following sub-sections.
 
