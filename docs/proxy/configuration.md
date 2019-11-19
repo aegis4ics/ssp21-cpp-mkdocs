@@ -24,7 +24,7 @@ sessions:                        # sequence of SSP21 proxy sessions
         ttl_pad:                 # how much of a time pad to apply to session messages
           value: 10              # the value associated with the 'unit'
           unit: seconds          # unit of the time {milliseconds, seconds, minutes, hours}
-#         ...                      OMITTED: initiator or responder specific session parameters
+#       ...                        OMITTED: initiator or responder specific session parameters
       handshake:                 # configuration of the handshake
 #       ...                        OMITTED: initiator or responder specific handshake parameters
         type: "shared_secret"    # type of handshake { shared_secret, preshared_public_key, qkd }
@@ -34,7 +34,7 @@ sessions:                        # sequence of SSP21 proxy sessions
 The YAML skeleton above describes all of the configuration values that must be present irrespective of the various modes that can be configured.
 The sections where configuration information have been omitted are dependent on the values of other parameters.
 
-### Log levels
+## Log levels
 
 The `levels` parameter in a session configuration contains a string of characters that specify which logs messages to enable.
 
@@ -69,6 +69,33 @@ UDP may be used with or without the link-layer. If the link-layer is not used, t
 link_layer:
     enabled: false
 ```
+
+## Session parameters
+
+The initiator requires a handful of additional parameters not required when configuring a responder.
+
+```
+security:
+  mode: "initiator"	  
+  session:
+    max_payload_size: 4096
+    ttl_pad:
+      value: 10
+      unit: seconds
+# ----- parameters below here are only required for an initiator -----
+    max_nonce_value: 32768                      # maximum value for a session nonce (maximum 65535)
+    nonce_renegotiation_trigger_value: 32700    # nonce value that triggers renegotiation
+    max_session_duration:                       # maximum validity time for an established session
+      value: 1
+      unit: hours
+    session_time_renegotiation_trigger:         # session time that triggers renegotiation
+      value: 59
+      unit: minutes
+```
+
+!!! note
+    In the future, the initiator will also allow you to specify which cryptographic primitives (suite) to use
+	when SSP21 formally specifies more than one primitive per function.
 
 ## Transport modes
 
