@@ -171,7 +171,7 @@ in a configuration file is a list of these sources
 qkd_sources:
   - qkd_source_id: "source1"        # a unique identifier for the source
     type: "qix"                     # the only supported type ATM is qix
-    key_cycle_length: 1             # the number of subscribers
+    num_subscribers: 1              # the number of subscribers
     serial:                  
       device: "/dev/pts/3"          # the serial device, e.g. /dev/ttyS0 or COM1
       baud: 9600                    # baud rate, defaults to 9600 if not specified
@@ -185,18 +185,25 @@ Down within a session's handshake section, the following parameters are required
 ```
   handshake:
     type: "qkd"               
-    key_source_id: "source1"        # the source id that matches the id in the 'qkd_sources' list
-    modulus: 0                      # the unique subscriber id in the range [0 ... (key_cycle_length - 1)]
-    max_key_cache_size: 100         # the maximum number of cached keys for this particular session.
+    key_source_id: "source1"        # source id matching the id in the list above
+    subscriber_id: 0                # unique subscriber id in the range [0 .. (num_subscribers - 1)]
+    max_key_cache_size: 100         # maximum number of cached keys for this particular session.
 ```
 
 !!! note 
     The format of the key data transmitted over the serial port is not standarized yet and is only interoperable at the moment with QKD transceivers from 
 	[Qubitekk](http://qubitekk.com/).
 
-The source expects the key identifier to increment so that it can send the keys to each subscriber in a predictable fashion.
+The source expects the key identifier to increment so that it can send the keys to each subscriber in a predictable fashion. The correct subscriber
+for any keys is calculated as:
+
+```
+subscriber_id = key_identifier % num_subscribers
+```
 
 ### Pre-shared public key
+
+Pre-shared key modes requires the paths to 3 keys be provideded:
 
 ```
  handshake:  
