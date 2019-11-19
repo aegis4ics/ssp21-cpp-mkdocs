@@ -130,39 +130,79 @@ The following diagram illustrates how the parameters above are applied:
 !!! warning
     Be careful when setting the ports so that no communication loops back creating a cycle.
 
-## Handshake types
+## Handshake configuration
 
 Different handshake modes require different paramters described in the following sub-sections.
 
-### Shared-secret mode
+!!! important
+    Initiator's require some additional configuration in the handshake section to specify some timeouts:
 
-| key                      | description                                                                  | 
-|--------------------------|------------------------------------------------------------------------------|
-| shared_secret_key_path   | path to an ICF file containing 256-bit symmetric key                         |
+```yaml
+handshake:
+  response_timeout:
+    value: 2
+    unit: seconds
+  retry_timeout:
+    value: 5
+    unit: seconds
+  type: # ....
+```
 
-### QKD mode
+These timeout parameters are not required when configuring a responder.
 
-| key                      | description                                                                         | 
-|--------------------------|-------------------------------------------------------------------------------------|
-| serial_port              | string ID of the serial port (e.g. COM1 or /dev/ttysO) where keys will be received  |
+
+### Shared-secret
+
+A shared secret handshake only requires a single parameter specifiying where the shared key resides.
+
+```yaml
+handshake:
+  type: "shared_secret"
+  shared_secret_key_path: "./shared_secret.icf"  # path to the file containing the shared secret
+```
+
+### QKD
+
+QKD mode allows for a source of keys to be shared across multiple proxy sessions. The first item
+in a configuration file is a list of these sources
+
+``` yaml
+# a sequence of QKD sources
+qkd_sources:
+  - qkd_source_id: "source1"        # a unique identifier for the source
+    type: "qix"                     # the only supported type ATM is qix
+    key_cycle_length: 1             # the number of subscribers
+    serial:                  
+      device: "/dev/pts/3"          # the serial device, e.g. /dev/ttyS0 or COM1
+      baud: 9600                    # baud rate, defaults to 9600 if not specified
+      data_bits: 8                  # data bits, defaults to 8 if not specified
+      flow_control: none            # flow control, defaults to 'none' if not specified
+      stop_bits: one                # stop bits, defaults to 'one' if not specified
+```
+
+Down within a session's handshake section, the following parameters are required:
+
+```
+  handshake:
+    type: "qkd"               
+    key_source_id: "source1"        # the source id that matches the id in the 'qkd_sources' list
+    modulus: 0                      # the unique subscriber id in the range [0 ... (key_cycle_length - 1)]
+    max_key_cache_size: 100         # the maximum number of cached keys for this particular session.
+```
 
 !!! note 
     The format of the key data transmitted over the serial port is not standarized yet and is only interoperable at the moment with QKD transceivers from 
 	[Qubitekk](http://qubitekk.com/).
 
-### Pre-shared public key mode
+The source expects the key identifier to increment so that it can send the keys to each subscriber in a predictable fashion.
 
-| key                      | description                                                              | 
-|--------------------------|--------------------------------------------------------------------------|
-| local_public_key_path    | ICF file containing this side's public DH key                            |
-| local_private_key_path   | ICF file containing this side's private DH key                           |
-| local_public_key_path    | ICF file containing the remote peers's public DH key                     |
+### Pre-shared public key
 
-### Certificate mode
+```
+ handshake:  
+  type: "preshared_public_key"
+  local_private_key_path: "./local_private_key.icf"     # private part of the local static DH key
+  local_public_key_path: "./local_public_key.icf"       # public part of the local static DH key
+  remote_public_key_path: "./remote_public_key.icf      # public key of the remote party
+```
 
-| key                      | description                                                                          | 
-|--------------------------|--------------------------------------------------------------------------------------|
-| local_public_key_path    | ICF file containing this side's public DH key                                        |
-| local_private_key_path   | ICF file containing this side's private DH key                                       |
-| authority_cert_path      | ICF file contain authority certificate on which to base trust of remote certificates |
-| local_cert_path          | ICF file containing certificate chain to present to remote peer                      |
