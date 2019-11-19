@@ -29,7 +29,7 @@ The following dependencies are only required for the proxy application, integrat
 |----------------------------------------------------|-----------|-----------|------------|------------------------------------------------------------------|
 | [libsodium](https://download.libsodium.org/doc/)   |  ISC      | no        | no         | default cryptographic backend                                    |
 | [ASIO](https://think-async.com/Asio/)              |  Boost    | no        | yes        | event loop + x-platform I/O                                      |
-| [inih](https://github.com/benhoyt/inih)            |  New BSD  | no        | yes        | config file parsing in proxy                                     |
+| [yaml-cpp](https://github.com/jbeder/yaml-cpp)     |  MIT      | no        | yes        | config file parsing in proxy                                     |
 | [argagg](https://github.com/vietjtnguyen/argagg)   |  MIT      | no        | yes        | cmd line argument parser                                         |
 
 ## Install libsodium

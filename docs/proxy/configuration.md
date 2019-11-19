@@ -1,125 +1,242 @@
 # Configuration
 
-The proxy accepts a single argument: the path to an [INI-style](https://en.wikipedia.org/wiki/INI_file) configuration file. 
-This file may contain an arbitrary number of configuration sections. Each section represents a single SSP21 `initiator` or `responder`
-configuration, e.g.:
+The proxy accepts a single argument: the path to a [YAML](https://yaml.org/) configuration file. This file contains a hierarchical
+configuration model that specifies the configuration for an arbitrary number of SSP21 `initiator` or `responder` sessions.
 
+``` yaml
+
+qkd_sources: []                  # sequence of QKD sources (e.g. QIX)
+sessions:                        # sequence of SSP21 proxy sessions
+  - id: "session1"               # an identifer for the session for logging purposes
+    levels: "iwemf"              # enabled log levels for this session
+    transport:                   # configuration of the transport
+      type: "tcp"                # type of transport { tcp, udp }
+#     ...                          OMITTED: transport type specific parameters omitted
+    link_layer:                  # configuration of the link layer
+      enabled: true              # if enabled, wrap SSP21 with the link-layer
+      address:                   # addressing configuration required if 'enabled' == true
+        local: 10                # the address of the local node
+        remote: 1                # the address of the local node
+    security:                    # configuration of the SSP21 crypto layer
+      mode: "initiator"	         # SSP21 mode: { initiator, responder }
+      session:                   # configuration of the cryptographic session
+        max_payload_size: 4096   # maximum number of payload bytes that can be sent or received
+        ttl_pad:                 # how much of a time pad to apply to session messages
+          value: 10              # the value associated with the 'unit'
+          unit: seconds          # unit of the time {milliseconds, seconds, minutes, hours}
+#       ...                        OMITTED: initiator or responder specific session parameters
+      handshake:                 # configuration of the handshake
+#       ...                        OMITTED: initiator or responder specific handshake parameters
+        type: "shared_secret"    # type of handshake { shared_secret, preshared_public_key, qkd }
+#       ...                        OMITTED: handshake type specific parameters
 ```
-[i-proxy]
-proto_type=tcp
-mode=<initiator|responder>
-log_levels=iwemf
-remote_address=1
-local_address=10
-handshake_mode=<shared_secret|qkd|preshared|certificate>
-; additional parameters depend on the handshake mode or protocol type
-```
 
-The name of section (i-proxy above) is used for logging purposes to uniquely identify log messages for a particular session.
+The YAML skeleton above describes all of the configuration values that must be present irrespective of the various modes that can be configured.
+The sections where configuration information have been omitted are dependent on the values of other parameters.
 
-## Standard options
+## Log levels
 
-| key              | description                                                                                                                  | 
-|------------------|------------------------------------------------------------------------------------------------------------------------------|
-| proto_type       | Defines the proxy uses `tcp` or `udp` as its transport protocol.                                                             |
-| mode             | Defines whether the session is an SSP21 `initiator` or a `responder`.                                                        |
-| log_levels       | string of enabled log levels (see [table](#log-levels)).                                                                     |
-| remote_address   | 16-bit remote address field to place in SSP21 link frames (only if a link-layer is used).                                    |
-| local_address    | 16-bit local address field to place in SSP21 link frames and expect from remote SSP21 peer (only is a link-layer is used).   |
-| handshake_mode   | Defines which of the four handshake modes to use. Additional parameters depend on this mode                                  |
-
-### Log levels
+The `levels` parameter in a session configuration contains a string of characters that specify which logs messages to enable.
 
 | level           | character | description                                                                                  |
 |-----------------|-----------|----------------------------------------------------------------------------------------------|
-| event           | v         |                                                                                              |
-| error           | e         |                                                                                              |
-| warning         | w         |                                                                                              |
-| info            | i         |                                                                                              |
-| debug           | d         |                                                                                              |
-| crypto message  | m         | Log the type of SSP21 message received and its length                                        |
-| crypto fields   | f         | Log the individual fields in SSP21 messages                                                  |
+| event           | v         | High priority messages such as startup and shutdown                                          |
+| error           | e         | Errors that don't occur during normal operation                                              |
+| warning         | w         | Less severe than error, events like discconects                                              |
+| info            | i         | Informational (non-error or warning) messages                                                |
+| debug           | d         | Detailed, but normally overhelming messages                                                  |
+| crypto message  | m         | High level decoding of SSP21 messages (type) and length                                      |
+| crypto fields   | f         | Detailed decoding of the individual fields in SSP21 messages                                 |
 
-## Transport-specific parameters
+## Link-layer
 
-### TCP mode
+The SSP21 link-layer provides framing for stream oriented transports like TCP. Additionally, it provides 16-bit source and destination
+addresses which can be used for multiplexing multiple sessions on a single transport.
 
-In TCP, the link-layer is always used because the transport layer is stream based. Therefore, SSP21 link-layer acts
-as a framing protocol.
+TCP must always enable the link-layer, or an exception is thrown during startup.
 
-| key              | description                                                                                                                  | 
-|------------------|------------------------------------------------------------------------------------------------------------------------------|
-| max_sessions     | Number of allowed concurrent connections. When a new connection is received, the oldest is closed.                           |
-| listen_port      | For `initiator` mode, port where proxy will listen for the insecure protocol connection.                                     |
-|                  | For `responder` mode, port where proxy will listen for SSP21 connection from an `initiator`                                  |
-| listen_endpoint  | For `initiator` mode, the IP address of the adapter on which the proxy will listen for the insecure protocol connection.     |
-|                  | For `responder` mode, the IP address of the adapter on which the proxy will listen for SSP21 connection from an `initiator`  |
-| connect_port     | For `initiator` mode, port where proxy will attempt to connect and send SSP21 traffic.                                       |
-|                  | For `responder` mode, port where proxy will attempt to connect and send insecure protcol traffic.                            |
-| connect_endpoint | For `initiator` mode, the IP address to connect to and send SSP21 traffic                                                    |
-|                  | For `responder` mode, the IP address to connect to and send insecure protcol traffic                                         |
+```
+link_layer:
+  enabled: true
+  address:
+    local: 10
+    remote: 1
+```
 
-### UDP mode
+UDP may be used with or without the link-layer. If the link-layer is not used, the address information may be omitted:
 
-In UDP, the link-layer is not mandatory, since the transport protocol is datagram based. Therefore, it is possible
-to configure the proxy to include or not the link-layer with the `crypto_only` setting. Adding the link-layer permits
-to do data integrity if the operating system is not doing it on UDP in IPv4 (the UDP checksum is mandatory in IPv6).
+```
+link_layer:
+    enabled: false
+```
 
-Since UDP is a connectionless transport protocol, it is mandatory to specify all the addresses and ports. The following schema
-illustrates the different settings:
+## Session parameters
+
+The initiator requires a handful of additional parameters not required when configuring a responder.
+
+```
+security:
+  mode: "initiator"	  
+  session:
+    max_payload_size: 4096
+    ttl_pad:
+      value: 10
+      unit: seconds
+# ----- parameters below here are only required for an initiator -----
+    max_nonce_value: 32768                      # maximum value for a session nonce (maximum 65535)
+    nonce_renegotiation_trigger_value: 32700    # nonce value that triggers renegotiation
+    max_session_duration:                       # maximum validity time for an established session
+      value: 1
+      unit: hours
+    session_time_renegotiation_trigger:         # session time that triggers renegotiation
+      value: 59
+      unit: minutes
+```
+
+!!! note
+    In the future, the initiator will also allow you to specify which cryptographic primitives (suite) to use
+	when SSP21 formally specifies more than one primitive per function.
+
+## Transport modes
+
+The proxy supports TCP and UDP transport. Both modes take specific parameters. The following subsections provide configuration
+snippets for each mode.
+
+### TCP
+
+TCP transport requires the following parameters.
+
+```
+transport:
+  type: "tcp"
+  max_sessions: 1                # The maximum number of concurrent sessions on the listening side
+    listen:           
+      address: "127.0.0.1"       # IP address of adapter on which to listen
+      port: 20000                # Port on which to listen
+    connect:
+      address: "127.0.0.1"       # IP to connect
+      port: 20001                # Port to connect
+```
+
+When using TCP as an initiator, the proxy will not attempt a SSP21/TCP connection until the application (raw) side
+of the connection occurs.
+
+!!! note
+    With regard to listening, certain special addresses have the typical meanings:
+
+	* *"0.0.0.0"* - listen on all adapters
+
+	* *"127.0.0.1"* - only accept connections from the loopback adapter
+
+### UDP
+
+UDP is a connectionless transport protocol, so you must specify addresses and ports
+for both receiving and transmitting separately.
+
+```
+transport:
+  type: "udp"      
+  raw_rx:
+    address: "127.0.0.1"
+    port: 20000
+  raw_tx:
+    address: "127.0.0.1"
+    port: 20001
+  secure_rx:
+    address: "127.0.0.1"
+    port: 20002
+  secure_tx:
+    address: "127.0.0.1"
+    port: 20003
+```
+
+The following diagram illustrates how the parameters above are applied:
 
 ![UDP proxy](../img/udp.svg)
 
 !!! warning
-    Be careful when setting the ports so that no communication loops back.
+    Be careful when setting the ports so that no communication loops back creating a cycle.
 
-| key                          | description                                                                                                                  | 
-|------------------------------|------------------------------------------------------------------------------------------------------------------------------|
-| crypto_only                  | Specify if the SSP21 stack should include the optional link-layer.                                                           |
-| raw.rx.ip                    | The IP address where the proxy listens for insecure traffic                                                                  |      
-| raw.rx.port                  | The port where the proxy listens for insecure traffic                                                                        |
-| raw.tx.ip                    | The IP address to which the proxy writes insecure traffic                                                                    |      
-| raw.tx.port                  | The port to which the proxy writes insecure traffic                                                                          |      
-| secure.rx.ip                 | The IP address where the proxy listens for SSP21 traffic                                                                     |      
-| secure.rx.port               | The port where the proxy listens for SSP21 traffic                                                                           |
-| secure.tx.ip                 | The IP address to which the proxy writes SSP21 traffic                                                                       |      
-| secure.tx.port               | The port to which the proxy writes SSP21 traffic                                                                             |      
-
-
-
-## Mode-specific parameters
+## Handshake configuration
 
 Different handshake modes require different paramters described in the following sub-sections.
 
-### Shared-secret mode
+!!! important
+    Initiator's require some additional configuration in the handshake section to specify some timeouts:
 
-| key                      | description                                                                  | 
-|--------------------------|------------------------------------------------------------------------------|
-| shared_secret_key_path   | path to an ICF file containing 256-bit symmetric key                         |
+```yaml
+handshake:
+  response_timeout:
+    value: 2
+    unit: seconds
+  retry_timeout:
+    value: 5
+    unit: seconds
+  type: # ....
+```
 
-### QKD mode
+These timeout parameters are not required when configuring a responder.
 
-| key                      | description                                                                         | 
-|--------------------------|-------------------------------------------------------------------------------------|
-| serial_port              | string ID of the serial port (e.g. COM1 or /dev/ttysO) where keys will be received  |
+
+### Shared-secret
+
+A shared secret handshake only requires a single parameter specifiying where the shared key resides.
+
+```yaml
+handshake:
+  type: "shared_secret"
+  shared_secret_key_path: "./shared_secret.icf"  # path to the file containing the shared secret
+```
+
+### QKD
+
+QKD mode allows for a source of keys to be shared across multiple proxy sessions. The first item
+in a configuration file is a list of these sources
+
+``` yaml
+# a sequence of QKD sources
+qkd_sources:
+  - qkd_source_id: "source1"        # a unique identifier for the source
+    type: "qix"                     # the only supported type ATM is qix
+    num_subscribers: 1              # the number of subscribers
+    serial:                  
+      device: "/dev/pts/3"          # the serial device, e.g. /dev/ttyS0 or COM1
+      baud: 9600                    # baud rate, defaults to 9600 if not specified
+      data_bits: 8                  # data bits, defaults to 8 if not specified
+      flow_control: none            # flow control, defaults to 'none' if not specified
+      stop_bits: one                # stop bits, defaults to 'one' if not specified
+```
+
+Down within a session's handshake section, the following parameters are required:
+
+```
+  handshake:
+    type: "qkd"               
+    key_source_id: "source1"        # source id matching the id in the list above
+    subscriber_id: 0                # unique subscriber id in the range [0 .. (num_subscribers - 1)]
+    max_key_cache_size: 100         # maximum number of cached keys for this particular session.
+```
 
 !!! note 
     The format of the key data transmitted over the serial port is not standarized yet and is only interoperable at the moment with QKD transceivers from 
 	[Qubitekk](http://qubitekk.com/).
 
-### Pre-shared public key mode
+The source expects the key identifier to increment so that it can send the keys to each subscriber in a predictable fashion. The correct subscriber
+for any keys is calculated as:
 
-| key                      | description                                                              | 
-|--------------------------|--------------------------------------------------------------------------|
-| local_public_key_path    | ICF file containing this side's public DH key                            |
-| local_private_key_path   | ICF file containing this side's private DH key                           |
-| local_public_key_path    | ICF file containing the remote peers's public DH key                     |
+```
+subscriber_id = key_identifier % num_subscribers
+```
 
-### Certificate mode
+### Pre-shared public key
 
-| key                      | description                                                                          | 
-|--------------------------|--------------------------------------------------------------------------------------|
-| local_public_key_path    | ICF file containing this side's public DH key                                        |
-| local_private_key_path   | ICF file containing this side's private DH key                                       |
-| authority_cert_path      | ICF file contain authority certificate on which to base trust of remote certificates |
-| local_cert_path          | ICF file containing certificate chain to present to remote peer                      |
+Pre-shared key modes requires the paths to 3 keys be provideded:
+
+```
+ handshake:  
+  type: "preshared_public_key"
+  local_private_key_path: "./local_private_key.icf"     # private part of the local static DH key
+  local_public_key_path: "./local_public_key.icf"       # public part of the local static DH key
+  remote_public_key_path: "./remote_public_key.icf      # public key of the remote party
+```
+
