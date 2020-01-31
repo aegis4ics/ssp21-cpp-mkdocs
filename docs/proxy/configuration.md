@@ -72,7 +72,7 @@ link_layer:
 
 ## Session parameters
 
-The initiator requires a handful of additional parameters not required when configuring a responder.
+The initiator requires a handful of additional session parameters not required when configuring a responder.
 
 ```
 security:
@@ -93,71 +93,28 @@ security:
       unit: minutes
 ```
 
-!!! note
-    In the future, the initiator will also allow you to specify which cryptographic primitives (suite) to use
-	when SSP21 formally specifies more than one primitive per function.
+## Handhake Parameters
 
-## Transport modes
+The initiator specifies the cryptographic primitives to use when establishing a session. There is no negotiation in 
+SSP21, therefore these parameters are only required when configuring an initiator.
 
-The proxy supports TCP and UDP transport. Both modes take specific parameters. The following subsections provide configuration
-snippets for each mode.
-
-### TCP
-
-TCP transport requires the following parameters.
-
-```
-transport:
-  type: "tcp"
-  max_sessions: 1                # The maximum number of concurrent sessions on the listening side
-    listen:           
-      address: "127.0.0.1"       # IP address of adapter on which to listen
-      port: 20000                # Port on which to listen
-    connect:
-      address: "127.0.0.1"       # IP to connect
-      port: 20001                # Port to connect
+``` yaml
+...
+handshake:
+  algorithms:
+    session_crypto_mode: hmac_sha256_16              # { hmac_sha256_16, aes_256_gcm }
+...
 ```
 
-When using TCP as an initiator, the proxy will not attempt a SSP21/TCP connection until the application (raw) side
-of the connection occurs.
+You can currently choose between an HMAC auth-only mode or authenticated encryption using AES-GCM.
+
 
 !!! note
-    With regard to listening, certain special addresses have the typical meanings:
+    In the future, the initiator will also allow you to specify additional cryptographic primitives
+    for the the KDF, handshake hash, and ECC key types in public key modes. At the moment, there
+    is only one choice for these primitives.
 
-	* *"0.0.0.0"* - listen on all adapters
-
-	* *"127.0.0.1"* - only accept connections from the loopback adapter
-
-### UDP
-
-UDP is a connectionless transport protocol, so you must specify addresses and ports
-for both receiving and transmitting separately.
-
-```
-transport:
-  type: "udp"      
-  raw_rx:
-    address: "127.0.0.1"
-    port: 20000
-  raw_tx:
-    address: "127.0.0.1"
-    port: 20001
-  secure_rx:
-    address: "127.0.0.1"
-    port: 20002
-  secure_tx:
-    address: "127.0.0.1"
-    port: 20003
-```
-
-The following diagram illustrates how the parameters above are applied:
-
-![UDP proxy](../img/udp.svg)
-
-!!! warning
-    Be careful when setting the ports so that no communication loops back creating a cycle.
-
-## Handshake configuration
+### Key modes
 
 Different handshake modes require different paramters described in the following sub-sections.
 
@@ -178,7 +135,7 @@ handshake:
 These timeout parameters are not required when configuring a responder.
 
 
-### Shared-secret
+#### Shared-secret
 
 A shared secret handshake only requires a single parameter specifiying where the shared key resides.
 
@@ -188,7 +145,7 @@ handshake:
   shared_secret_key_path: "./shared_secret.icf"  # path to the file containing the shared secret
 ```
 
-### QKD
+#### QKD
 
 QKD mode allows for a source of keys to be shared across multiple proxy sessions. The first item
 in a configuration file is a list of these sources
@@ -228,7 +185,7 @@ for any keys is calculated as:
 subscriber_id = key_identifier % num_subscribers
 ```
 
-### Pre-shared public key
+#### Pre-shared public key
 
 Pre-shared key modes requires the paths to 3 keys be provideded:
 
@@ -240,3 +197,62 @@ Pre-shared key modes requires the paths to 3 keys be provideded:
   remote_public_key_path: "./remote_public_key.icf      # public key of the remote party
 ```
 
+## Transport modes
+
+The proxy supports TCP and UDP transport. Both modes take specific parameters. The following subsections provide configuration
+snippets for each mode.
+
+### TCP
+
+TCP transport requires the following parameters.
+
+```
+transport:
+  type: "tcp"
+  max_sessions: 1                # The maximum number of concurrent sessions on the listening side
+    listen:
+      address: "127.0.0.1"       # IP address of adapter on which to listen
+      port: 20000                # Port on which to listen
+    connect:
+      address: "127.0.0.1"       # IP to connect
+      port: 20001                # Port to connect
+```
+
+When using TCP as an initiator, the proxy will not attempt a SSP21/TCP connection until the application (raw) side
+of the connection occurs.
+
+!!! note
+    With regard to listening, certain special addresses have the typical meanings:
+
+	* *"0.0.0.0"* - listen on all adapters
+
+	* *"127.0.0.1"* - only accept connections from the loopback adapter
+
+### UDP
+
+UDP is a connectionless transport protocol, so you must specify addresses and ports
+for both receiving and transmitting separately.
+
+```
+transport:
+  type: "udp"
+  raw_rx:
+    address: "127.0.0.1"
+    port: 20000
+  raw_tx:
+    address: "127.0.0.1"
+    port: 20001
+  secure_rx:
+    address: "127.0.0.1"
+    port: 20002
+  secure_tx:
+    address: "127.0.0.1"
+    port: 20003
+```
+
+The following diagram illustrates how the parameters above are applied:
+
+![UDP proxy](../img/udp.svg)
+
+!!! warning
+    Be careful when setting the ports so that no communication loops back creating a cycle.
