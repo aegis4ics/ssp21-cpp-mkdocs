@@ -207,6 +207,11 @@ subscriber_id = key_identifier % num_subscribers
 
 ![QKD subscribers](../img/qkd.svg)
 
+The diagram above shows a configuration with a single QKD source receiving QIX frames and sending the keys
+to subscribers #0, #1, and #2. In this case the `num_subscribers` parameter is set to 3.  If it was set to a number greater
+than 3, keys where `key_id % num_subscribers > 2` would be silently discarded . If it were set to a number less than 3,
+the proxy would fail to start with a configuration error since one or more of the subscriber would never receive keys.
+
 ## Transport modes
 
 The proxy supports TCP and UDP transport. Both modes take specific parameters. The following subsections provide configuration
