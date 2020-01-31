@@ -145,6 +145,18 @@ handshake:
   shared_secret_key_path: "./shared_secret.icf"  # path to the file containing the shared secret
 ```
 
+#### Pre-shared public key
+
+Pre-shared key modes requires the paths to 3 keys be provideded:
+
+```
+ handshake:  
+  type: "preshared_public_key"
+  local_private_key_path: "./local_private_key.icf"     # private part of the local static DH key
+  local_public_key_path: "./local_public_key.icf"       # public part of the local static DH key
+  remote_public_key_path: "./remote_public_key.icf      # public key of the remote party
+```
+
 #### QKD
 
 QKD mode allows for a source of keys to be shared across multiple proxy sessions. The first item
@@ -164,7 +176,7 @@ qkd_sources:
       stop_bits: one                # stop bits, defaults to 'one' if not specified
 ```
 
-Down within a session's handshake section, the following parameters are required:
+In a session's handshake configuration section, the following parameters are required:
 
 ```
   handshake:
@@ -175,27 +187,25 @@ Down within a session's handshake section, the following parameters are required
 ```
 
 !!! note 
-    The format of the key data transmitted over the serial port is not standarized yet and is only interoperable at the moment with QKD transceivers from 
+    The format of the key data transmitted over the serial port is not standardized yet and is only interoperable at the moment with QKD transceivers from 
 	[Qubitekk](http://qubitekk.com/).
 
-The source expects the key identifier to increment so that it can send the keys to each subscriber in a predictable fashion. The correct subscriber
-for any keys is calculated as:
+QIX keys contain `uint64_t` key identifier field which increments. This allows the QKD source (serial port) to send the keys to each subscriber in a round-robin fashion.
+Each subscribing session maintains a key off of configurable length (`max_key_cache_size`). 
+
+Each key is sent to a subscribing session using the key identifier modulo the number of subscribers:
 
 ```
 subscriber_id = key_identifier % num_subscribers
 ```
 
-#### Pre-shared public key
+!!! warning
+    Sessions at paired ends of a QKD link must agree on both the `num_subscribers` parameter, and each paired session
+    must agree on `subscriber_id`. If either of these two parameters don't match, initiators and subscribers will not
+    have keys with the same key identifiers in their corresponding key caches, and they will not be able to perform a
+    handshake. If a responder returns the error code `KEY_NOT_FOUND` this is a good indicator of a misconfiguration. 
 
-Pre-shared key modes requires the paths to 3 keys be provideded:
-
-```
- handshake:  
-  type: "preshared_public_key"
-  local_private_key_path: "./local_private_key.icf"     # private part of the local static DH key
-  local_public_key_path: "./local_public_key.icf"       # public part of the local static DH key
-  remote_public_key_path: "./remote_public_key.icf      # public key of the remote party
-```
+![QKD subscribers](../img/qkd.svg)
 
 ## Transport modes
 
