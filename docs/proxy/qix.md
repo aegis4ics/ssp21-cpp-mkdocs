@@ -22,19 +22,25 @@ The project includes a command line application called `qix-emulator` that can r
 ```
 > qix-emulator --help
 
-    -h, --help
-        shows this help message
-    -r, --read
-        read QIX frames
-    -w, --write
-        read QIX frames
-    -p, --port
-        serial port
-    -t, --rate
-        number of keys per second (write only) - defaults to 1
-    -c, --count
-        number of frames to transmit (write only) - defaults to 2^64 -1
+       -h, --help
+           shows this help message
+       -r, --read
+           read QIX frames
+       -w, --write
+           write random QIX frames
+       -d, --stdin
+           read lines of key data from stdin and write the specified port
+       -m, --twrite
+           write time-based QIX frames modulo n milliseconds
+       -p, --port
+           serial port
+       -t, --rate
+           number of keys per second (write only) - defaults to 1
+       -c, --count
+           number of frames to transmit (write only) - defaults to 2^64 -1
 ```
+
+### Simulating a serial port
 
 For testing purposes, you can use `socat` to create a virtual null-modem serial port pair:
 
@@ -44,6 +50,8 @@ For testing purposes, you can use `socat` to create a virtual null-modem serial 
 2019/05/08 13:02:31 socat[50869] N PTY is /dev/pts/2
 2019/05/08 13:02:31 socat[50869] N starting data transfer loop with FDs [5,5] and [7,7]
 ```
+
+### Reading and writing random frames
 
 You can then start writing and reading on each end of the null-modem pair:
 
@@ -69,4 +77,25 @@ If you want to write the same key data to two ports to test a proxy link without
 
 ```
 > ./qix-emulator -w -p /dev/pts/1 -p /dev/pts/2
+```
+
+### Reading frames from `stdin`
+
+The emulator can accept key data from `stdin` where each line of input consists of 256 `1` or `0` characters:
+
+```
+qix-emulator -d -p /dev/pts/0
+0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+```
+
+An emulator reading the QIX frames from the matching port would see:
+
+```
+qix-emulator -r -p /dev/pts/1
+ms(1582915992228) qix-reader info    port open for reading QIX frames on: /dev/pts/1
+waiting for QIX frames
+press <enter> to terminate
+read: 0 - ok - 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55 55
+read: 1 - ok - 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 ```

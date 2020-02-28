@@ -168,6 +168,11 @@ qkd_sources:
   - qkd_source_id: "source1"        # a unique identifier for the source
     type: "qix"                     # the only supported type ATM is qix
     num_subscribers: 1              # the number of subscribers
+    metrics:               
+      bin_size: 10                  # the number of samples in a FIFO bin
+      update_period:                # how frequently the metrics are recalculated
+        value: 5
+        unit: seconds
     serial:                  
       device: "/dev/pts/3"          # the serial device, e.g. /dev/ttyS0 or COM1
       baud: 9600                    # baud rate, defaults to 9600 if not specified
@@ -211,6 +216,22 @@ The diagram above shows a configuration with a single QKD source receiving QIX f
 to subscribers #0, #1, and #2. In this case the `num_subscribers` parameter is set to 3.  If it was set to a number greater
 than 3, keys where `key_id % num_subscribers > 2` would be silently discarded . If it were set to a number less than 3,
 the proxy would fail to start with a configuration error since one or more of the subscriber would never receive keys.
+
+##### Metrics
+
+The QIX module that parsers incoming key frames calculates a couple of metrics on the fly:
+
+* The average interval between frames (the inverse of the frames/sec, i.e. sec/frame)
+* The stddev in this interval
+* The running shannon entropy of all keys received
+
+!!! note
+    The Shannon entropy is calculated with bytes [0,255] being the input symbols. The module maintains an
+    array (`uint64_t[256]`) where the number of each byte value is counted. The calculated entropy value will
+    converge to 1.0 for a uniformly random distribution of byte values.
+    
+You can control the frequency of metric outputs to the log stream using the `qkd_sources.metrics.update_period` parameter.
+The `qkd_sources.metrics.bin_size` parameter has no effect on the entropy calculation. 
 
 ## Transport modes
 
